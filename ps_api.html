@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PS5</title>
+    <script>
+		const extensionElem = ( data ) => {
+			const link = document.createElement( 'a' );
+			link.setAttribute( 'href', 'https://mediawiki.org/wiki/' + data.title );
+			link.setAttribute( 'target', '_blank' );
+			link.innerText = data.title;
+
+			const li = document.createElement( 'li' );
+			li.append( link );
+			return li;
+		};
+
+		const REQ_URL = 'https://www.mediawiki.org/w/api.php?action=query' +
+			'&list=categorymembers&cmtitle=Category:Stable%20extensions' + 
+			'&cmtype=page&format=json&formatversion=2&origin=*';
+
+		// Need to wait for document to load
+        document.addEventListener( 'DOMContentLoaded', () => {
+			const onResponse = ( responseJSON ) => {
+				const intro = document.createElement( 'p' );
+				intro.innerText = 'Some of the "stable" MediaWiki extensions retrieved from MediaWiki.org are:';
+
+				const list = document.createElement( 'ul' );
+				const listElems = responseJSON.query.categorymembers.map( extensionElem );
+				list.append( ...listElems );
+
+				const catLink = document.createElement( 'a' );
+				catLink.setAttribute( 'href', 'https://mediawiki.org/wiki/Category:Stable_extensions' );
+				catLink.setAttribute( 'target', '_blank' );
+				catLink.innerText = 'Category:Stable extensions';
+
+				const andMore = document.createElement( 'p' );
+				andMore.append(
+					'The full list of stable extensions can be found at ',
+					catLink,
+					' on MediaWiki.org'
+				);
+
+				const output = document.createElement( 'div' );
+				output.append( intro, list, andMore );
+				document.querySelector( 'body' ).append( output );
+			};
+			const onError = ( e ) => {
+				const error = document.createTextNode( e.toString() );
+				const errorLabel = document.createElement( 'strong' );
+				errorLabel.innerText = 'Error: ';
+
+				const errorWrap = document.createElement( 'p' );
+				errorWrap.append( errorLabel, error );
+				document.querySelector( 'body' ).append( errorWrap );
+			};
+			fetch( REQ_URL )
+				.then( ( response ) => response.json() )
+				.then( onResponse )
+				.catch( onError );
+        } );
+    </script>
+</head>
+<body>
+
+<div id="result-wrapper"></div>
+
+</body>
+</html>
